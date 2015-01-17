@@ -1,1 +1,3 @@
 pyramid/
+*.pyc
+*.swp
