@@ -184,25 +184,25 @@ def parse_distinct(line):
         return None
 
 def parse_doubled_letters_1(line):
-	res = re.match(r'^Contains at least one doubled letter: (.+)', line)
-	if res:
-		return have_doubled_letters['YES' == res.group(1)]
-	else:
-		return None
+    res = re.match(r'^Contains at least one doubled letter: (.+)', line)
+    if res:
+        return have_doubled_letters['YES' == res.group(1)]
+    else:
+        return None
 
 def parse_doubled_letters_2_same(line):
-	res = re.match(r'^Contains at least two nonoverlapping occurrences of the same doubled letter: (.+)', line)
-	if res:
-		return have_same_doubled_letters['YES' == res.group(1)]
-	else:
-		return None
+    res = re.match(r'^Contains at least two nonoverlapping occurrences of the same doubled letter: (.+)', line)
+    if res:
+        return have_same_doubled_letters['YES' == res.group(1)]
+    else:
+        return None
 
 def parse_doubled_letters_2_different(line):
-	res = re.match(r'^Contains at least two different doubled letters: (.+)', line)
-	if res:
-		return have_different_doubled_letters['YES' == res.group(1)]
-	else:
-		return None
+    res = re.match(r'^Contains at least two different doubled letters: (.+)', line)
+    if res:
+        return have_different_doubled_letters['YES' == res.group(1)]
+    else:
+        return None
 
 def parse_end(line):
     res = re.match(r'^Ends with: (.+)', line)
@@ -428,9 +428,9 @@ all_matchers = [
                 parse_common_vowels,
                 parse_contains,
                 parse_distinct,
-				parse_doubled_letters_1,
-				parse_doubled_letters_2_same,
-				parse_doubled_letters_2_different,
+                parse_doubled_letters_1,
+                parse_doubled_letters_2_same,
+                parse_doubled_letters_2_different,
                 parse_end,
                 parse_keyboard,
                 parse_length,
