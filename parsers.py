@@ -1,6 +1,7 @@
 from __future__ import division
 import hashlib
 import re
+from struct import *
 
 from helpers import *
 
@@ -417,7 +418,28 @@ def parse_word_representation(line):
             assert False, 'Unknown representation: %s' % res.group(1)
         return result
     else:
-        return None
+        res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is exactly representable in (.+): (.+)', line)
+        if res:
+            repr_type = res.group(1)
+            if repr_type == 'IEEE 754 single-precision floating point format':
+                format_char = 'f'
+            elif repr_type == 'IEEE 754 double-precision floating point format':
+                format_char = 'd'
+            else:
+                assert False, 'Unknown format: %s' % res.group(1)
+            representable = 'YES' == res.group(2)
+
+            result = []
+            for word in wordlist:
+                word_num = base26(word)
+                parsed, = unpack(format_char, pack(format_char, word_num))
+                if word_num == parsed and representable:
+                    result.append(word)
+                elif word_num != parsed and not representable:
+                    result.append(word)
+            return result
+        else:
+            return None
 
 all_matchers = [
                 parse_anagram,
