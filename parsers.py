@@ -411,7 +411,7 @@ all_matchers = [
 
 # File processor
 
-def process_file(fname, testword=None):
+def process_file(fname, verbose=False, testword=None):
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
     words = None
@@ -428,7 +428,8 @@ def process_file(fname, testword=None):
         if line.startswith('True statements about') or line.startswith('Some statements that uniquely identify'):
             continue
 
-        print line
+        if verbose:
+            print line
 
         matched = 0
         for matcher in all_matchers:

@@ -15,6 +15,10 @@ _PARSER.add_argument(
     '-c',
     help='Column number of cell',
     type=str)
+_PARSER.add_argument(
+    '-v',
+    help='Verbose',
+    action='store_true')
 
 # Set up pyramid.
 
@@ -26,7 +30,7 @@ pyramid = [[None]*cols for i in range(rows)]
 
 # Load in pyramid data.
 
-def process_all():
+def process_all(verbose):
     print
     print '---------------'
     print 'Solving pyramid'
@@ -37,7 +41,7 @@ def process_all():
             row = int(dirname[3:])
             for filename in listdir('pyramid/%s' % dirname):
                 col = int(filename[(len(dirname) + 4):][:-4])
-                pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename))
+                pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename), verbose=verbose)
 
     with open('output.csv', 'wb') as f:
         writer = csv.writer(f, delimiter='\t')
@@ -46,10 +50,10 @@ def process_all():
 
 parsed_args = _PARSER.parse_args()
 if not parsed_args.r or not parsed_args.c:
-    process_all()
+    process_all(parsed_args.v)
 else:
     # Run for a single cell.
     words = process_file(
         'pyramid/row%s/row%s_col%s.txt' %
-        (parsed_args.r, parsed_args.r, parsed_args.c))
+        (parsed_args.r, parsed_args.r, parsed_args.c), verbose=parsed_args.v)
     print words
