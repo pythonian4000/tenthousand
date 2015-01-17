@@ -142,6 +142,26 @@ def parse_anagram(line):
     else:
         return None
 
+def parse_common_letters(line):
+    res = re.match(r'^Most common letter\(s\) each account\(s\) for: (.+)', line)
+    if res:
+        lower, upper, percentage = helper_bounds(res.group(1))
+
+        result = []
+        for word in wordlist:
+            most_common = 0
+            for vowel in 'aeiou':
+                count = sum(1 for c in word)
+                if most_common < count:
+                    most_common = count
+            if percentage:
+                most_common = most_common/len(word)*100
+            if most_common >= lower and most_common <= upper:
+                result.append(word)
+        return result
+    else:
+        return None
+
 def parse_common_vowels(line):
     res = re.match(r'^Most common vowel\(s\) each appear\(s\): (.+)', line)
     if res:
@@ -292,6 +312,7 @@ def parse_word_divisible(line):
 
 all_matchers = [parse_contains,
                 parse_anagram,
+                parse_common_letters,
                 parse_common_vowels,
                 parse_marked,
                 parse_scrabble,
