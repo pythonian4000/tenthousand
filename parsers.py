@@ -63,7 +63,7 @@ for word in wordlist:
     sha_words[word] = m
 
     if len(word) <= 3:
-        match_wordlist_3_or_fewer.add(word)
+        match_wordlist_3_or_fewer.add(word.upper())
 
     if word[0] in 'aeiou'.upper():
         start_vowel.add(word)
@@ -266,7 +266,10 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            count = find_nonoverlapping(word, dataset)
+            if match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
+                count = find_nonoverlapping(word, dataset)
+            else:
+                count = find_nonoverlapping_fast(word, dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
