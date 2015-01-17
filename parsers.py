@@ -1,7 +1,6 @@
 from __future__ import division
 import hashlib
 import re
-import string
 
 from helpers import *
 
@@ -53,11 +52,9 @@ for word in wordlist:
             caesar_shiftable.add(word)
             break
 
-    count = find_most_common_char_count(word, string.ascii_uppercase)
-    most_common_letter_counts[word] = count
-
-    count = find_most_common_char_count(word, 'AEIOU')
-    most_common_vowel_counts[word] = count
+    l, v = find_most_common_char_counts(word)
+    most_common_letter_counts[word] = l
+    most_common_vowel_counts[word] = v
 
     m = hashlib.sha1(word.lower()).hexdigest()
     sha_words[word] = m
@@ -115,28 +112,20 @@ def parse_caesar(line):
     else:
         return None
 
-def parse_common_letters(line):
-    res = re.match(r'^Most common letter\(s\) each account\(s\) for: (.+)', line)
+def parse_common(line):
+    res = re.match(r'^Most common (.+)\(s\) each account\(s\) for: (.+)', line)
     if res:
-        lower, upper, percentage = helper_bounds(res.group(1))
+        match_type = res.group(1)
+        if match_type == 'letter':
+            dataset = most_common_letter_counts
+        elif match_type == 'vowel':
+            dataset = most_common_vowel_counts
+        else:
+            assert False, 'Unknown location: %s' % res.group(1)
+        lower, upper, percentage = helper_bounds(res.group(2))
 
         result = []
-        for word, count in most_common_letter_counts.iteritems():
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
-    else:
-        return None
-
-def parse_common_vowels(line):
-    res = re.match(r'^Most common vowel\(s\) each appear\(s\): (.+)', line)
-    if res:
-        lower, upper, percentage = helper_bounds(res.group(1))
-
-        result = []
-        for word, count in most_common_vowel_counts.iteritems():
+        for word, count in dataset.iteritems():
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
@@ -429,8 +418,7 @@ def parse_word_representation(line):
 all_matchers = [
                 parse_anagram,
                 parse_caesar,
-                parse_common_letters,
-                parse_common_vowels,
+                parse_common,
                 parse_contains,
                 parse_distinct,
                 parse_doubled_letters_1,
