@@ -18,12 +18,12 @@ for word in wordlist:
 anagrams_0 = set()
 anagrams_1 = set()
 anagrams_2 = set()
-with open('anagrams-0.txt') as f:
+"""with open('anagrams-0.txt') as f:
     anagrams_0 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-1.txt') as f:
     anagrams_1 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-2.txt') as f:
-    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())
+    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())"""
 
 have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
 have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
@@ -150,10 +150,9 @@ def parse_common_letters(line):
         result = []
         for word in wordlist:
             most_common = 0
-            for vowel in 'aeiou':
-                count = sum(1 for c in word)
-                if most_common < count:
-                    most_common = count
+            count = sum(1 for c in word)
+            if most_common < count:
+                most_common = count
             if percentage:
                 most_common = most_common/len(word)*100
             if most_common >= lower and most_common <= upper:
@@ -259,6 +258,22 @@ def parse_sha1(line):
     else:
         return None
 
+def parse_start_vowel(line):
+    res = re.match(r'^Starts with a vowel: (.+)', line)
+    if res:
+        vowel = 'YES' == res.group(1)
+        result = []
+        for word in wordlist:
+            starts_vowel = False
+            for v in 'AEIOU':
+                if word[0] == v:
+                    starts_vowel = True
+            if starts_vowel == vowel:
+                result.append(word)
+        return result
+    else:
+        return None
+
 def parse_sum_letters(line):
     res = re.match(r'^Sum of letters \(A=1, B=2, etc\): (.+)', line)
     if res:
@@ -347,6 +362,7 @@ all_matchers = [parse_contains,
                 parse_marked,
                 parse_scrabble,
                 parse_sha1,
+                parse_start_vowel,
                 parse_sum_letters,
                 parse_sum_letters_divisible,
                 parse_vowels,
