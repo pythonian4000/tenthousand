@@ -65,6 +65,29 @@ def caesar(plaintext, shift):
     table = string.maketrans(alphabet, shifted_alphabet)
     return plaintext.translate(table)
 
+def doubledletter(word):
+	found1 = False
+	found_char = set()
+	found2 = False
+	found_same = False
+	found_different = False
+	for i,c in enumerate(word):
+		if i == len(word) -1:
+			break
+		if c == word[i+1]:
+			if found1:
+				found2 = True
+				for x in found_char:
+					if c == x:
+						found_same = True
+					else:
+						found_different = True
+				found_char.add(c)
+			else:
+				found1 = True
+				found_char.add(c)
+	return found1, found2, found_same, found_different
+
 def find_most_common_char_count(word, dataset):
     most_common = 0
     for letter in dataset:
