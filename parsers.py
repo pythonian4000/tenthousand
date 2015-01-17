@@ -3,6 +3,8 @@ import hashlib
 import re
 from struct import *
 
+from collections import defaultdict
+
 from helpers import *
 
 import lettersums_data
@@ -106,17 +108,20 @@ wordlist_count = get_count(match_wordlist_3_or_fewer)
 
 # Parsers
 
+has_at_least_anagram = re.compile(r'^Has at least one anagram that is also in the word list: (.*)')
+can_be_combined_with_one_addtl_ltr = re.compile(r'^Can be combined with one additional letter to produce an anagram of something in the word list: (.*)')
+can_be_combined_with_two_addtl_ltrs = re.compile(r'^Can be combined with two additional letters to produce an anagram of something in the word list: (.*)')
 def parse_anagram(line):
     if 'anagram' in line:
-        res = re.match(r'^Has at least one anagram that is also in the word list: (.*)', line)
+        res = has_at_least_anagram.match(line)
         if res:
             return have_anagrams['YES' == res.group(1)]
 
-        res = re.match(r'^Can be combined with one additional letter to produce an anagram of something in the word list: (.*)', line)
+        res = can_be_combined_with_one_addtl_ltr.match(line)
         if res:
             return have_anagrams_with_one['YES' == res.group(1)]
 
-        res = re.match(r'^Can be combined with two additional letters to produce an anagram of something in the word list: (.*)', line)
+        res = can_be_combined_with_two_addtl_ltrs.match(line)
         if res:
             return have_anagrams_with_two['YES' == res.group(1)]
 
@@ -124,15 +129,17 @@ def parse_anagram(line):
     else:
         return None
 
+parse_caesar_regex = re.compile(r'^Can be Caesar shifted to produce another word in the word list: (.+)')
 def parse_caesar(line):
-    res = re.match(r'^Can be Caesar shifted to produce another word in the word list: (.+)', line)
+    res = parse_caesar_regex.match(line)
     if res:
         return can_caesar_shift['YES' == res.group(1)]
     else:
         return None
 
+parse_common_regex = re.compile(r'^Most common (.+)\(s\) each a.+: (.+)')
 def parse_common(line):
-    res = re.match(r'^Most common (.+)\(s\) each a.+: (.+)', line)
+    res = parse_common_regex.match(line)
     if res:
         match_type = res.group(1)
         if match_type == 'letter':
@@ -155,8 +162,9 @@ def parse_common(line):
     else:
         return None
 
+parse_contains_regex = re.compile("^Contains: (.*)$")
 def parse_contains(line):
-    res = re.match("^Contains: (.*)$", line)
+    res = parse_contains_regex.match(line)
     if res:
         result = []
         for word in wordlist:
@@ -166,8 +174,9 @@ def parse_contains(line):
     else:
         return None
 
+parse_distinct_regex = re.compile(r'^Distinct (.+)s: (.+)')
 def parse_distinct(line):
-    res = re.match(r'^Distinct (.+)s: (.+)', line)
+    res = parse_distinct_regex.match(line)
     if res:
         match_type = res.group(1)
         if match_type == 'letter':
@@ -190,29 +199,33 @@ def parse_distinct(line):
     else:
         return None
 
+parse_doubled_letters_1_regex = re.compile(r'^Contains at least one doubled letter: (.+)')
 def parse_doubled_letters_1(line):
-    res = re.match(r'^Contains at least one doubled letter: (.+)', line)
+    res = parse_doubled_letters_1_regex.match(line)
     if res:
         return have_doubled_letters['YES' == res.group(1)]
     else:
         return None
 
+parse_doubled_letters_2_same_regex = re.compile(r'^Contains at least two nonoverlapping occurrences of the same doubled letter: (.+)')
 def parse_doubled_letters_2_same(line):
-    res = re.match(r'^Contains at least two nonoverlapping occurrences of the same doubled letter: (.+)', line)
+    res = parse_doubled_letters_2_same_regex.match(line)
     if res:
         return have_same_doubled_letters['YES' == res.group(1)]
     else:
         return None
 
+parse_doubled_letters_2_different_regex = re.compile(r'^Contains at least two different doubled letters: (.+)')
 def parse_doubled_letters_2_different(line):
-    res = re.match(r'^Contains at least two different doubled letters: (.+)', line)
+    res = parse_doubled_letters_2_different_regex.match(line)
     if res:
         return have_different_doubled_letters['YES' == res.group(1)]
     else:
         return None
 
+parse_end_regex = re.compile(r'^Ends with: (.+)')
 def parse_end(line):
-    res = re.match(r'^Ends with: (.+)', line)
+    res = parse_end_regex.match(line)
     if res:
         result = []
         for word in wordlist:
@@ -222,8 +235,14 @@ def parse_end(line):
     else:
         return None
 
+words_keyboard_map = defaultdict(dict)
+for word in wordlist:
+    for dataset in ['qwertyuiop'.upper(), 'asdfghjkl'.upper(), 'zxcvbnm'.upper()]:
+        words_keyboard_map[word][dataset] = sum(1 for c in word if c in dataset)
+
+qwerty_keyboard_regex = re.compile(r'^Letters located in the (.+) row on a QWERTY keyboard: (.+)')
 def parse_keyboard(line):
-    res = re.match(r'^Letters located in the (.+) row on a QWERTY keyboard: (.+)', line)
+    res = qwerty_keyboard_regex.match(line)
     if res:
         match_type = res.group(1)
         if match_type == 'top':
@@ -238,7 +257,7 @@ def parse_keyboard(line):
 
         result = []
         for word in wordlist:
-            count = sum(1 for c in word if c in dataset)
+            count = words_keyboard_map[word][dataset]
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
@@ -247,8 +266,9 @@ def parse_keyboard(line):
     else:
         return None
 
+parse_length_regex = re.compile(r'^Length: (.+)')
 def parse_length(line):
-    res = re.match(r'^Length: (.+)', line)
+    res = parse_length_regex.match(line)
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
@@ -260,8 +280,9 @@ def parse_length(line):
     else:
         return None
 
+parse_marked_regex = re.compile(r'If you marked nonoverlapping (.*), you could mark at most: (.*)')
 def parse_marked(line):
-    res = re.match(r'If you marked nonoverlapping (.*), you could mark at most: (.*)', line)
+    res = parse_marked_regex.match(line)
     if res:
         match_type = res.group(1)
         if match_type == 'officially-assigned ISO 3166-1 alpha-2 country codes':
@@ -288,8 +309,9 @@ def parse_marked(line):
     else:
         return None
 
+parse_scrabble_regex = re.compile(r'^Base Scrabble score: (.+)')
 def parse_scrabble(line):
-    res = re.match(r'^Base Scrabble score: (.+)', line)
+    res = parse_scrabble_regex.match(line)
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
@@ -302,20 +324,24 @@ def parse_scrabble(line):
     else:
         return None
 
+parse_sha1_regex = re.compile("^SHA-1 hash of lowercased word, expressed in hexadecimal, (.*)$")
+parse_sha1_subres_startswith = re.compile(r'^starts with: ([0-9A-F]+)')
+parse_sha1_subres_endswith = re.compile(r'^ends with: ([0-9A-F]+)')
+parse_sha1_subres_contains = re.compile(r'^contains: ([0-9A-F]+)')
 def parse_sha1(line):
-    res = re.match("^SHA-1 hash of lowercased word, expressed in hexadecimal, (.*)$", line)
+    res = parse_sha1_regex.match(line)
     if res:
-        subres = re.match(r'^starts with: ([0-9A-F]+)', res.group(1))
+        subres = parse_sha1_subres_startswith.match(res.group(1))
         if (subres):
             g = subres.group(1).lower()
             return [word for (word, h) in sha_words.iteritems() if h.startswith(g)]
 
-        subres = re.match(r'^ends with: ([0-9A-F]+)', res.group(1))
+        subres = parse_sha1_subres_endswith.match(res.group(1))
         if (subres):
             g = subres.group(1).lower()
             return [word for (word, h) in sha_words.iteritems() if h.endswith(g)]
 
-        subres = re.match(r'^contains: ([0-9A-F]+)', res.group(1))
+        subres = parse_sha1_subres_contains.match(res.group(1))
         if (subres):
             g = subres.group(1).lower()
             return [word for (word, h) in sha_words.iteritems() if g in h]
@@ -324,8 +350,9 @@ def parse_sha1(line):
     else:
         return None
 
+parse_start_regex = re.compile(r'^Starts with: (.+)')
 def parse_start(line):
-    res = re.match(r'^Starts with: (.+)', line)
+    res = parse_start_regex.match(line)
     if res:
         result = []
         for word in wordlist:
@@ -335,15 +362,17 @@ def parse_start(line):
     else:
         return None
 
+parse_start_vowel_regex = re.compile(r'^Starts with a vowel: (.+)')
 def parse_start_vowel(line):
-    res = re.match(r'^Starts with a vowel: (.+)', line)
+    res = parse_start_vowel_regex.match(line)
     if res:
         return starts_with_vowel['YES' == res.group(1)]
     else:
         return None
 
+parse_sum_letters_regex = re.compile(r'^Sum of letters \(A=1, B=2, etc\): (.+)')
 def parse_sum_letters(line):
-    res = re.match(r'^Sum of letters \(A=1, B=2, etc\): (.+)', line)
+    res = parse_sum_letters_regex.match(line)
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
@@ -355,8 +384,9 @@ def parse_sum_letters(line):
     else:
         return None
 
+parse_sum_letters_divisible_regex = re.compile(r'^Sum of letters \(A=1, B=2, etc\) is divisible by ([0-9]): (.+)')
 def parse_sum_letters_divisible(line):
-    res = re.match(r'^Sum of letters \(A=1, B=2, etc\) is divisible by ([0-9]): (.+)', line)
+    res = parse_sum_letters_divisible_regex.match(line)
     if res:
         divisor = int(res.group(1))
         divisible = 'YES' == res.group(2)
@@ -371,8 +401,9 @@ def parse_sum_letters_divisible(line):
     else:
         return None
 
+parse_vowels_regex = re.compile(r'^Vowels: (.+)')
 def parse_vowels(line):
-    res = re.match(r'^Vowels: (.+)', line)
+    res = parse_vowels_regex.match(line)
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
@@ -387,8 +418,9 @@ def parse_vowels(line):
     else:
         return None
 
+parse_word_divisible_regex = re.compile(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is divisible by ([0-9]): (.+)')
 def parse_word_divisible(line):
-    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is divisible by ([0-9]): (.+)', line)
+    res = parse_word_divisible_regex.match(line)
     if res:
         divisor = int(res.group(1))
         divisible = 'YES' == res.group(2)
@@ -404,8 +436,10 @@ def parse_word_divisible(line):
     else:
         return None
 
+parse_word_representation_regex = re.compile(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is representable as (.+): (.+)')
+parse_word_representation_exact_regex = re.compile(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is exactly representable in (.+): (.+)')
 def parse_word_representation(line):
-    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is representable as (.+): (.+)', line)
+    res = parse_word_representation_regex.match(line)
     if res:
         repr_type = res.group(1)
         representable = 'YES' == res.group(2)
@@ -429,7 +463,7 @@ def parse_word_representation(line):
             assert False, 'Unknown representation: %s' % res.group(1)
         return result
     else:
-        res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is exactly representable in (.+): (.+)', line)
+        res = parse_word_representation_exact_regex.match(line)
         if res:
             repr_type = res.group(1)
             if repr_type == 'IEEE 754 single-precision floating point format':
@@ -479,7 +513,12 @@ all_matchers = [
 
 # File processor
 
+
+
+
 def process_file(fname, testword=None):
+    if not fname:
+        return []
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
     words = None
