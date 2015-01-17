@@ -463,7 +463,7 @@ all_matchers = [
 def process_file(fname):
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
-    words = None
+    words = oldwords = None
     for line in lines:
         print line
         if not line:
@@ -486,10 +486,9 @@ def process_file(fname):
             if words is None:
                 words = set(res)
             else:
-                if not set(res):
-                    print 'About to fail. Last set of words:'
-                    print words
                 words = words.intersection(set(res))
             break
-        assert matched, "Line %s not matched" % (line,)
+        assert matched, "Line not matched: %s" % (line,)
+        assert len(words) > 0, "Line removed all words: %s\nLast line's words: %s" % (line, oldwords)
+        oldwords = words
     return words
