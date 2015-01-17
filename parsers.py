@@ -37,6 +37,9 @@ caesar_shiftable = set()
 most_common_letter_counts = {}
 most_common_vowel_counts = {}
 most_common_consonant_counts = {}
+distinct_letter_counts = {}
+distinct_vowel_counts = {}
+distinct_consonant_counts = {}
 match_wordlist_3_or_fewer = set()
 sha_words = {}
 start_vowel = set()
@@ -64,6 +67,11 @@ for word in wordlist:
     most_common_vowel_counts[word] = v
     most_common_consonant_counts[word] = c
 
+    l, v, c = find_unique_counts(word)
+    distinct_letter_counts[word] = l
+    distinct_vowel_counts[word] = v
+    distinct_consonant_counts[word] = c
+
     m = hashlib.sha1(word.lower()).hexdigest()
     sha_words[word] = m
 
@@ -82,6 +90,17 @@ have_doubled_letters = {True: doubled_letter_1, False: wordlist.difference(doubl
 have_same_doubled_letters = {True: doubled_letter_2_same, False: wordlist.difference(doubled_letter_2_same)}
 have_different_doubled_letters = {True: doubled_letter_2_different, False: wordlist.difference(doubled_letter_2_different)}
 
+
+def get_count(dataset):
+    ret = {}
+    for word in wordlist:
+        ret[word] = find_nonoverlapping(word, dataset)
+    return ret
+
+country_count = get_count(match_country_codes)
+postal_count = get_count(match_state_postal_codes)
+element_count = get_count(match_chemical_element_symbols)
+wordlist_count = get_count(match_wordlist_3_or_fewer)
 
 # Parsers
 
@@ -146,26 +165,23 @@ def parse_contains(line):
         return None
 
 def parse_distinct(line):
-    res = re.match(r'^Distinct (.+): (.+)', line)
+    res = re.match(r'^Distinct (.+)s: (.+)', line)
     if res:
+        match_type = res.group(1)
+        if match_type == 'letter':
+            dataset = distinct_letter_counts
+        elif match_type == 'vowel':
+            dataset = distinct_vowel_counts
+        elif match_type == 'consonant':
+            dataset = distinct_consonant_counts
+        else:
+            assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
 
         result = []
-        for word in wordlist:
-            unique = ''.join(set(word))
-            count = 0
-            if res.group(1) == 'vowels':
-                for c in unique:
-                    for vowel in 'aeiou'.upper():
-                        if c == vowel:
-                            count+=1
-            elif res.group(1) == 'consonants':
-                for c in unique:
-                    for consonant in 'bcdfghjklmnpqrstvwxyz'.upper():
-                        if c == consonant:
-                            count+=1
-            else: #letters
-                count = len(unique)
+        for word, count in dataset.iteritems():
+            if percentage:
+                count = count/len(word)*100
             if count >= lower and count <= upper:
                 result.append(word)
         return result
@@ -247,13 +263,13 @@ def parse_marked(line):
     if res:
         match_type = res.group(1)
         if match_type == 'officially-assigned ISO 3166-1 alpha-2 country codes':
-            dataset = match_country_codes
+            dataset = country_count
         elif match_type == 'US state postal abbreviations':
-            dataset = match_state_postal_codes
+            dataset = postal_count
         elif match_type == 'chemical element symbols (atomic number 112 or below)':
-            dataset = match_chemical_element_symbols
+            dataset = element_count
         elif match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
-            dataset = match_wordlist_3_or_fewer
+            dataset = wordlist_count
         else:
             assert False, 'Unknown marking: %s' % res.group(1)
 
@@ -261,7 +277,7 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            count = find_nonoverlapping(word, dataset)
+            count = dataset[word]
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
@@ -466,7 +482,7 @@ all_matchers = [
 def process_file(fname, testword=None):
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
-    words = oldwords = None
+    words = None
     for line in lines:
         if not line:
             continue
@@ -495,5 +511,4 @@ def process_file(fname, testword=None):
         assert len(words) > 0, "Line removed all words: %s\n" % (line)
         if testword:
             assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
-        oldwords = words
     return words

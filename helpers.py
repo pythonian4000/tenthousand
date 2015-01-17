@@ -110,3 +110,17 @@ def find_most_common_char_counts(word):
             if c < count:
                 c = count
     return l, v, c
+
+def find_unique_counts(word):
+    l = v = c = 0
+    unique = ''.join(set(word))
+    for ch in unique:
+        for vowel in 'aeiou'.upper():
+            if ch == vowel:
+                v += 1
+    for ch in unique:
+        for consonant in 'bcdfghjklmnpqrstvwxyz'.upper():
+            if ch == consonant:
+                c += 1
+    l = len(unique)
+    return l, v, c

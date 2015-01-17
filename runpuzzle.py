@@ -1,4 +1,5 @@
 from os import listdir
+import csv
 
 print 'Warming up...'
 
@@ -25,3 +26,7 @@ for dirname in listdir('pyramid'):
         for filename in listdir('pyramid/%s' % dirname):
             col = int(filename[(len(dirname) + 4):][:-4])
             pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename))
+with open('output.csv', 'wb') as f:
+    writer = csv.writer(f, delimiter='\t')
+    writer.writerows(pyramid)
+
