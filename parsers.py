@@ -1,19 +1,12 @@
 from __future__ import division
 import hashlib
 import re
-import string
+
+from helpers import *
 
 with open('pyramid/words.txt') as f:
     wordlist = set(word.upper().rstrip() for word in f.readlines())
 m = hashlib.sha1()
-sha_words = {}
-match_wordlist_3_or_fewer = set()
-
-for word in wordlist:
-    m = hashlib.sha1(word.lower()).hexdigest()
-    sha_words[word] = m
-    if len(word) <= 3:
-        match_wordlist_3_or_fewer.add(word)
 
 anagrams_0 = set()
 anagrams_1 = set()
@@ -24,10 +17,6 @@ with open('anagrams-1.txt') as f:
     anagrams_1 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-2.txt') as f:
     anagrams_2 = set(word.upper().rstrip() for word in f.readlines())"""
-
-have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
-have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
-have_anagrams_with_two = {True: anagrams_2, False: wordlist.difference(anagrams_2)}
 
 with open('country-codes.txt') as f:
     match_country_codes = set(word.upper().rstrip() for word in f.readlines())
@@ -46,87 +35,32 @@ scrabble_points = {
     'y':  4, 'z': 10,
 }
 
-
-# Helper functions
-
-def helper_bounds(bounds):
-    lower = upper = 0;
-    percentage = False
-
-    res = re.match(r'^exactly ([0-9.]+)\%', bounds)
-    res2 = re.match(r'^between ([0-9.]+)\% and ([0-9.]+)\% \(inclusive\)', bounds)
-    if res:
-        # A percentage
-        lower = upper = float(res.group(1))
-        percentage = True
-    elif res2:
-        # Also a percentage
-        lower = float(res2.group(1))
-        upper = float(res2.group(2))
-        percentage = True
-    else:
-        # An absolute number or range
-        res = re.match(r'^([0-9]+)', bounds)
-        if res:
-            lower = upper = int(res.group(1))
-        else:
-            res = re.match(r'^between ([0-9]+) and ([0-9]+) \(inclusive\)', bounds)
-            if res:
-                lower = int(res.group(1))
-                upper = int(res.group(2))
-
-    return lower, upper, percentage
-
-def find_nonoverlapping(word, dataset, recurse):
-    count = 0
-    start = 0
-    first_match = -1
-    for end in range(1, len(word) + 1):
-        if word[start:end].upper() in dataset:
-            count += end - start
-            start = end
-            if first_match < 0:
-                first_match = end
-
-    if recurse and (first_match > 0):
-        for i in range(1, first_match):
-            subcount = find_nonoverlapping(word[i:], dataset, False)
-            if subcount > count:
-                count = subcount
-
-    return count
-
-def base26(word):
-    word = word.upper()
-    val = 0
-    for i, c in enumerate(word):
-        letter_val = ord(c) - ord('A')
-        if i == len(word) - 1:
-            val += letter_val
-        else:
-            val += 26**(len(word)-i-1) + letter_val
-    return val
-
-def caesar(plaintext, shift):
-    alphabet = string.ascii_uppercase
-    shifted_alphabet = alphabet[shift:] + alphabet[:shift]
-    table = string.maketrans(alphabet, shifted_alphabet)
-    return plaintext.translate(table)
-
 caesar_shiftable = set()
+match_wordlist_3_or_fewer = set()
+sha_words = {}
+start_vowel = set()
+
 for word in wordlist:
     for shift in range(1,26):
         shifted = caesar(word, shift)
         if shifted in wordlist:
             caesar_shiftable.add(word)
             break
-caesar_unshiftable = wordlist.difference(caesar_shiftable)
 
-start_vowel = set()
-for word in wordlist:
+    m = hashlib.sha1(word.lower()).hexdigest()
+    sha_words[word] = m
+
+    if len(word) <= 3:
+        match_wordlist_3_or_fewer.add(word)
+
     if word[0] in 'aeiou'.upper():
         start_vowel.add(word)
-start_vowel_not = wordlist.difference(start_vowel)
+
+have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
+have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
+have_anagrams_with_two = {True: anagrams_2, False: wordlist.difference(anagrams_2)}
+can_caesar_shift = {True: caesar_shiftable, False: wordlist.difference(caesar_shiftable)}
+starts_with_vowel = {True: start_vowel, False: wordlist.difference(start_vowel)}
 
 
 # Parsers
@@ -152,8 +86,7 @@ def parse_anagram(line):
 def parse_caesar(line):
     res = re.match(r'^Can be Caesar shifted to produce another word in the word list: (.+)', line)
     if res:
-        possible = 'YES' == res.group(1)
-        return possible and caesar_shiftable or caesar_unshiftable
+        return can_caesar_shift['YES' == res.group(1)]
     else:
         return None
 
@@ -371,8 +304,7 @@ def parse_start(line):
 def parse_start_vowel(line):
     res = re.match(r'^Starts with a vowel: (.+)', line)
     if res:
-        vowel = 'YES' == res.group(1)
-        return vowel and start_vowel or start_vowel_not
+        return starts_with_vowel['YES' == res.group(1)]
     else:
         return None
 
