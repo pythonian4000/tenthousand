@@ -1,6 +1,7 @@
 from __future__ import division
 import hashlib
 import re
+import string
 
 with open('pyramid/words.txt') as f:
     wordlist = set(word.upper().rstrip() for word in f.readlines())
@@ -106,6 +107,21 @@ def base26(word):
             val += 26**(len(word)-i-1) + letter_val
     return val
 
+def caesar(plaintext, shift):
+    alphabet = string.ascii_uppercase
+    shifted_alphabet = alphabet[shift:] + alphabet[:shift]
+    table = string.maketrans(alphabet, shifted_alphabet)
+    return plaintext.translate(table)
+
+caesar_shiftable = set()
+for word in wordlist:
+    for shift in range(1,26):
+        shifted = caesar(word, shift)
+        if shifted in wordlist:
+            caesar_shiftable.add(word)
+            break
+caesar_unshiftable = wordlist.difference(caesar_shiftable)
+
 
 # Parsers
 
@@ -124,6 +140,14 @@ def parse_anagram(line):
             return have_anagrams_with_two['YES' == res.group(1)]
 
         assert False, 'Unknown anagram: %s' % line
+    else:
+        return None
+
+def parse_caesar(line):
+    res = re.match(r'^Can be Caesar shifted to produce another word in the word list: (.+)', line)
+    if res:
+        possible = 'YES' == res.group(1)
+        return possible and caesar_shiftable or caesar_unshiftable
     else:
         return None
 
@@ -436,6 +460,7 @@ def parse_word_unsigned_32_bit_integer(line):
 
 all_matchers = [
                 parse_anagram,
+                parse_caesar,
                 parse_common_letters,
                 parse_common_vowels,
                 parse_contains,
