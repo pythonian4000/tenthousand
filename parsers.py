@@ -471,6 +471,9 @@ def process_file(fname):
         # TODO temporary, we don't understand colors yet
         if line.startswith('This word is associated with the color'):
             continue
+        # Ignore these, they are from test files
+        if line.startswith('True statements about') or line.startswith('Some statements that uniquely identify'):
+            continue
         matched = 0
         for matcher in all_matchers:
             res = matcher(line)
