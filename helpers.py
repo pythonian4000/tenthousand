@@ -65,3 +65,10 @@ def caesar(plaintext, shift):
     table = string.maketrans(alphabet, shifted_alphabet)
     return plaintext.translate(table)
 
+def find_most_common_char_count(word, dataset):
+    most_common = 0
+    for letter in dataset:
+        count = sum(1 for c in word if c == letter)
+        if most_common < count:
+            most_common = count
+    return most_common
