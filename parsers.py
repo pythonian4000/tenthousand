@@ -109,20 +109,6 @@ def base26(word):
 
 # Parsers
 
-def parse_contains(line):
-    res = re.match("^Contains: (.*)$", line)
-    if res:
-        result = []
-        for word in wordlist:
-            include = True
-            for c in res.group(1):
-                include = include and c in word
-            if include:
-                result.append(word)
-        return result
-    else:
-        return None
-
 def parse_anagram(line):
     if 'anagram' in line:
         res = re.match(r'^Has at least one anagram that is also in the word list: (.*)', line)
@@ -176,6 +162,20 @@ def parse_common_vowels(line):
             if percentage:
                 most_common = most_common/len(word)*100
             if most_common >= lower and most_common <= upper:
+                result.append(word)
+        return result
+    else:
+        return None
+
+def parse_contains(line):
+    res = re.match("^Contains: (.*)$", line)
+    if res:
+        result = []
+        for word in wordlist:
+            include = True
+            for c in res.group(1):
+                include = include and c in word
+            if include:
                 result.append(word)
         return result
     else:
@@ -434,10 +434,11 @@ def parse_word_unsigned_32_bit_integer(line):
     else:
         return None
 
-all_matchers = [parse_contains,
+all_matchers = [
                 parse_anagram,
                 parse_common_letters,
                 parse_common_vowels,
+                parse_contains,
                 parse_distinct,
                 parse_end,
                 parse_keyboard,
