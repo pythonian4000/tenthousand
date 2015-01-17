@@ -38,6 +38,7 @@ scrabble_points = {
 caesar_shiftable = set()
 most_common_letter_counts = {}
 most_common_vowel_counts = {}
+most_common_consonant_counts = {}
 match_wordlist_3_or_fewer = set()
 sha_words = {}
 start_vowel = set()
@@ -52,9 +53,10 @@ for word in wordlist:
             caesar_shiftable.add(word)
             break
 
-    l, v = find_most_common_char_counts(word)
+    l, v, c = find_most_common_char_counts(word)
     most_common_letter_counts[word] = l
     most_common_vowel_counts[word] = v
+    most_common_consonant_counts[word] = c
 
     m = hashlib.sha1(word.lower()).hexdigest()
     sha_words[word] = m
@@ -120,6 +122,8 @@ def parse_common(line):
             dataset = most_common_letter_counts
         elif match_type == 'vowel':
             dataset = most_common_vowel_counts
+        elif match_type == 'consonant':
+            dataset = most_common_consonant_counts
         else:
             assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
