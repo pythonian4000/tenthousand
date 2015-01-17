@@ -553,7 +553,9 @@ def process_file(fname, testword=None):
             break
 
         assert matched, "Line not matched: %s" % (line,)
-        assert len(words) > 0, "Line removed all words: %s\n" % (line)
+        if len(words) <= 0:
+            print "WARNING: Line removed all words: %s (in fname: %s)\n" % (line, fname)
         if testword:
             assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
     return words
+
