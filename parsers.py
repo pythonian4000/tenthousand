@@ -414,7 +414,7 @@ all_matchers = [
 def process_file(fname, verbose=False, testword=None):
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
-    words = None
+    words = oldwords = None
     for line in lines:
         if not line:
             continue
@@ -444,7 +444,14 @@ def process_file(fname, verbose=False, testword=None):
             break
 
         assert matched, "Line not matched: %s" % (line,)
-        assert len(words) > 0, "Line removed all words: %s\n" % (line)
-        if testword:
-            assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
+        try:
+            assert len(words) > 0, "Line removed all words: %s\n" % (line)
+            if testword:
+                assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
+        except AssertionError as e:
+            if verbose:
+                print 'ERROR! last words before it:'
+                print oldwords
+            raise e
+        oldwords = words
     return words

@@ -41,7 +41,11 @@ def process_all(verbose):
             row = int(dirname[3:])
             for filename in listdir('pyramid/%s' % dirname):
                 col = int(filename[(len(dirname) + 4):][:-4])
-                pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename), verbose=verbose)
+                try :
+                    pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename), verbose=verbose)
+                except AssertionError as e:
+                    print 'ERROR at row %d col %d:' % (row, col)
+                    raise e
 
     with open('output.csv', 'wb') as f:
         writer = csv.writer(f, delimiter='\t')
