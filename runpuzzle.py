@@ -27,17 +27,17 @@ pyramid = [[None]*cols for i in range(rows)]
 # Load in pyramid data.
 
 def process_all():
-	print
-	print '---------------'
-	print 'Solving pyramid'
-	print '---------------'
+    print
+    print '---------------'
+    print 'Solving pyramid'
+    print '---------------'
 
-	for dirname in listdir('pyramid'):
-	    if dirname.startswith('row'):
-	        row = int(dirname[3:])
-	        for filename in listdir('pyramid/%s' % dirname):
-	            col = int(filename[(len(dirname) + 4):][:-4])
-	            pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename))
+    for dirname in listdir('pyramid'):
+        if dirname.startswith('row'):
+            row = int(dirname[3:])
+            for filename in listdir('pyramid/%s' % dirname):
+                col = int(filename[(len(dirname) + 4):][:-4])
+                pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename))
 
     with open('output.csv', 'wb') as f:
         writer = csv.writer(f, delimiter='\t')
@@ -46,10 +46,10 @@ def process_all():
 
 parsed_args = _PARSER.parse_args()
 if not parsed_args.r or not parsed_args.c:
-	process_all()
+    process_all()
 else:
-	# Run for a single cell.
-	words = process_file(
-		'pyramid/row%s/row%s_col%s.txt' %
-		(parsed_args.r, parsed_args.r, parsed_args.c))
-	print words
+    # Run for a single cell.
+    words = process_file(
+        'pyramid/row%s/row%s_col%s.txt' %
+        (parsed_args.r, parsed_args.r, parsed_args.c))
+    print words
