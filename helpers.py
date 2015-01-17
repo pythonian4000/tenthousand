@@ -50,16 +50,11 @@ def find_nonoverlapping(word, dataset):
     count_off2 = find_nonoverlapping_from(word, dataset, 2)
     return max(count, count_off1, count_off2)
 
+base26_alphabet = string.digits + string.ascii_uppercase[:16]
+base26_table = string.maketrans(string.ascii_uppercase, base26_alphabet)
 def base26(word):
     word = word.upper()
-    val = 0
-    for i, c in enumerate(word):
-        letter_val = ord(c) - ord('A')
-        if i == len(word) - 1:
-            val += letter_val
-        else:
-            val += 26**(len(word)-i-1) + letter_val
-    return val
+    return int(word.translate(base26_table), 26)
 
 def caesar(plaintext, shift):
     alphabet = string.ascii_uppercase
