@@ -419,6 +419,13 @@ def parse_word_representation(line):
                     result.append(word)
                 elif len(bin(word_num)[2:]) > 32 and not representable:
                     result.append(word)
+        elif repr_type == 'an unsigned 64-bit integer':
+            for word in wordlist:
+                word_num = base26(word)
+                if len(bin(word_num)[2:]) <= 64 and representable:
+                    result.append(word)
+                elif len(bin(word_num)[2:]) > 64 and not representable:
+                    result.append(word)
         else:
             assert False, 'Unknown representation: %s' % res.group(1)
         return result
