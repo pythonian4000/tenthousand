@@ -36,9 +36,6 @@ scrabble_points = {
     'y':  4, 'z': 10,
 }
 
-anagrams_0 = set()
-anagrams_1 = set()
-anagrams_2 = set()
 caesar_shiftable = set()
 most_common_letter_counts = {}
 most_common_vowel_counts = {}
