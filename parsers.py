@@ -495,7 +495,9 @@ def process_file(fname, testword=None):
         # Ignore these, they are from test files
         if line.startswith('True statements about') or line.startswith('Some statements that uniquely identify'):
             continue
+
         print line
+
         matched = 0
         for matcher in all_matchers:
             res = matcher(line)
@@ -507,6 +509,7 @@ def process_file(fname, testword=None):
             else:
                 words = words.intersection(set(res))
             break
+
         assert matched, "Line not matched: %s" % (line,)
         assert len(words) > 0, "Line removed all words: %s\n" % (line)
         if testword:
