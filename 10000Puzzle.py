@@ -220,6 +220,37 @@ def parse_end(line):
     else:
         return None
 
+def parse_keyboard(line):
+    res = re.match(r'^Letters located in the (.+) row on a QWERTY keyboard: (.+)', line)
+    if res:
+        lower, upper, percentage = helper_bounds(res.group(2))
+
+        result = []
+        for word in wordlist:
+            count = 0
+            if res.group(1) == 'top':
+                for c in word:
+                    for top in 'qwertyuiop'.upper():
+                        if c == top:
+                            count+=1
+            elif res.group(1) == 'middle':
+                for c in word:
+                    for middle in 'asdfghjkl'.upper():
+                        if c == middle:
+                            count+=1
+            else: #bottom
+                for c in word:
+                    for lower in 'zxcvbnm'.upper():
+                        if c == lower:
+                            count+=1
+            if percentage:
+                count = count/len(word)*100
+            if count >= lower and count <= upper:
+                result.append(word)
+        return result
+    else:
+        return None
+
 def parse_length(line):
     res = re.match(r'^Length: (.+)', line)
     if res:
@@ -315,7 +346,7 @@ def parse_start_vowel(line):
         result = []
         for word in wordlist:
             starts_vowel = False
-            for v in 'AEIOU':
+            for v in 'aeiou'.upper():
                 if word[0] == v:
                     starts_vowel = True
             if starts_vowel == vowel:
@@ -410,6 +441,7 @@ all_matchers = [parse_contains,
                 parse_common_vowels,
                 parse_distinct,
                 parse_end,
+                parse_keyboard,
                 parse_length,
                 parse_marked,
                 parse_scrabble,
