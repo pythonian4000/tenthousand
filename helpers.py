@@ -46,32 +46,38 @@ def find_nonoverlapping_fast(word, dataset):
     count_off1 = find_nonoverlapping_from(word, dataset, 1)
     return max(count, count_off1)
 
-def find_nonoverlapping_recursive(word, dataset, i):
+def find_nonoverlapping_recursive(word, dataset, i, _mem):
     if i >= len(word):
         return 0
+    if _mem[i] != -1:
+        return _mem[i]
+    _mem[i] = 0
 
-    found2 = found3 = False
-    if word[i:i+2].upper() in dataset:
-        found2 = True
-    if word[i:i+3].upper() in dataset:
-        found3 = True
+    found1 = found2 = found3 = False
+    if word[i].upper() in dataset:
+        found1 = True
+    if i < len(word) - 1:
+        if word[i:i+2].upper() in dataset:
+            found2 = True
+	if i < len(word) - 2:
+		if word[i:i+3].upper() in dataset:
+			found3 = True
 
-    if found2 and not found3:
-        return find_nonoverlapping_recursive(word, dataset, i+2) + 1
-    elif found3 and not found2:
-        return find_nonoverlapping_recursive(word, dataset, i+3) + 1
-    elif found2 and found3:
-        count2 = find_nonoverlapping_recursive(word, dataset, i+2)
-        count3 = find_nonoverlapping_recursive(word, dataset, i+3)
-        return max(count2, count3) + 1
-    else:
-        return 0
+    if found1:
+        _mem[i] = max(_mem[i],find_nonoverlapping_recursive(word, dataset, i+1, _mem) + 1)
+    if found2:
+        _mem[i] = max(_mem[i],find_nonoverlapping_recursive(word, dataset, i+2, _mem) + 2)
+    if found3:
+        _mem[i] = max(_mem[i],find_nonoverlapping_recursive(word, dataset, i+3, _mem) + 3)
+    
+    _mem[i] = max(_mem[i], find_nonoverlapping_recursive(word, dataset, i+1, _mem))
+
+    return _mem[i]
 
 def find_nonoverlapping(word, dataset):
-    count = find_nonoverlapping_recursive(word, dataset, 0)
-    count_off1 = find_nonoverlapping_recursive(word, dataset, 1)
-    count_off2 = find_nonoverlapping_recursive(word, dataset, 2)
-    return max(count, count_off1, count_off2)
+    _mem = [-1]*100
+    find_nonoverlapping_recursive(word, dataset, 0, _mem)
+    return _mem[0]
 
 base26_alphabet = string.digits + string.ascii_uppercase[:16]
 base26_table = string.maketrans(string.ascii_uppercase, base26_alphabet)

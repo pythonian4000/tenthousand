@@ -7,6 +7,7 @@ from parsers import process_file
 detailed = {}
 normal = {}
 
+
 for filename in listdir('pyramid/examples'):
     with open('pyramid/examples/%s' % filename) as f:
         wordline = f.readline()

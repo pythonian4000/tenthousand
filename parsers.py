@@ -263,10 +263,10 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            if match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
-                count = find_nonoverlapping(word, dataset)
-            else:
-                count = find_nonoverlapping_fast(word, dataset)
+            #if match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
+            count = find_nonoverlapping(word, dataset)
+            #else:
+            #    count = find_nonoverlapping_fast(word, dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
@@ -497,8 +497,8 @@ def process_file(fname, testword=None):
                 words = words.intersection(set(res))
             break
         assert matched, "Line not matched: %s" % (line,)
-        assert len(words) > 0, "Line removed all words: %s\nLast line's words: %s" % (line, oldwords)
+        assert len(words) > 0, "Line removed all words: %s\n" % (line)
         if testword:
-            assert testword in words, "Line removed test word %s: %s\nLast line's words: %s" % (testword, line, oldwords)
+            assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
         oldwords = words
     return words
