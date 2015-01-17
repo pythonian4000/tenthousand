@@ -96,6 +96,17 @@ def find_nonoverlapping(word, dataset, recurse):
 
     return count
 
+def base26(word):
+    word = word.upper()
+    val = 0
+    for i, c in enumerate(word):
+        letter_val = ord(c) - ord('A')
+        if i == len(word) - 1:
+            val += letter_val
+        else:
+            val += 26**(len(word)-i-1) + letter_val
+    return val
+
 
 # Parsers
 
@@ -262,6 +273,23 @@ def parse_vowels(line):
     else:
         return None
 
+def parse_word_divisible(line):
+    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is divisible by ([0-9]): (.+)', line)
+    if res:
+        divisor = int(res.group(1))
+        divisible = 'YES' == res.group(2)
+
+        result = []
+        for word in wordlist:
+            word_num = base26(word)
+            if word_num % divisor == 0 and divisible:
+                result.append(word)
+            elif word_num % divisor != 0 and not divisible:
+                result.append(word)
+        return result
+    else:
+        return None
+
 all_matchers = [parse_contains,
                 parse_anagram,
                 parse_common_vowels,
@@ -271,6 +299,7 @@ all_matchers = [parse_contains,
                 parse_sum_letters,
                 parse_sum_letters_divisible,
                 parse_vowels,
+                parse_word_divisible,
 ]
 
 
