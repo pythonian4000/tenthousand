@@ -152,13 +152,9 @@ def parse_common(line):
             assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
 
-        result = []
-        for word, count in dataset.iteritems():
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
+        if percentage:
+            dataset = {word: count/len(word)*100 for word, count in dataset.iteritems()}
+        return [word for word, count in dataset.iteritems() if count >= lower and count <= upper]
     else:
         return None
 
@@ -166,11 +162,7 @@ parse_contains_regex = re.compile("^Contains: (.*)$")
 def parse_contains(line):
     res = parse_contains_regex.match(line)
     if res:
-        result = []
-        for word in wordlist:
-            if res.group(1) in word:
-                result.append(word)
-        return result
+        return [word for word in wordlist if res.group(1) in word]
     else:
         return None
 
@@ -189,13 +181,9 @@ def parse_distinct(line):
             assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
 
-        result = []
-        for word, count in dataset.iteritems():
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
+        if percentage:
+            dataset = {word: count/len(word)*100 for word, count in dataset.iteritems()}
+        return [word for word, count in dataset.iteritems() if count >= lower and count <= upper]
     else:
         return None
 
@@ -227,11 +215,7 @@ parse_end_regex = re.compile(r'^Ends with: (.+)')
 def parse_end(line):
     res = parse_end_regex.match(line)
     if res:
-        result = []
-        for word in wordlist:
-            if word.endswith(res.group(1)):
-                result.append(word)
-        return result
+        return [word for word in wordlist if word.endswith(res.group(1))]
     else:
         return None
 
@@ -255,14 +239,10 @@ def parse_keyboard(line):
             assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
 
-        result = []
-        for word in wordlist:
-            count = words_keyboard_map[word][dataset]
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
+        data = {word: sum(1 for c in word if c in dataset) for word in wordlist}
+        if percentage:
+            data = {word: count/len(word)*100 for word, count in data.iteritems()}
+        return [word for word, count in data.iteritems() if count >= lower and count <= upper]
     else:
         return None
 
@@ -272,11 +252,7 @@ def parse_length(line):
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
-        result = []
-        for word in wordlist:
-            if len(word) >= lower and len(word) <= upper:
-                result.append(word)
-        return result
+        return [word for word in wordlist if len(word) >= lower and len(word) <= upper]
     else:
         return None
 
@@ -298,14 +274,9 @@ def parse_marked(line):
 
         lower, upper, percentage = helper_bounds(res.group(2))
 
-        result = []
-        for word in wordlist:
-            count = dataset[word]
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
+        if percentage:
+            dataset = {word: count/len(word)*100 for word, count in dataset.iteritems()}
+        return [word for word, count in dataset.iteritems() if count >= lower and count <= upper]
     else:
         return None
 
@@ -315,12 +286,8 @@ def parse_scrabble(line):
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
-        result = []
-        for word in wordlist:
-            score = sum(scrabble_points[c.lower()] for c in word)
-            if score >= lower and score <= upper:
-                result.append(word)
-        return result
+        dataset = {word: sum(scrabble_points[c.lower()] for c in word) for word in wordlist}
+        return [word for word, score in dataset.iteritems() if score >= lower and score <= upper]
     else:
         return None
 
@@ -354,11 +321,7 @@ parse_start_regex = re.compile(r'^Starts with: (.+)')
 def parse_start(line):
     res = parse_start_regex.match(line)
     if res:
-        result = []
-        for word in wordlist:
-            if word.startswith(res.group(1)):
-                result.append(word)
-        return result
+        return [word for word in wordlist if word.startswith(res.group(1))]
     else:
         return None
 
@@ -407,14 +370,10 @@ def parse_vowels(line):
     if res:
         lower, upper, percentage = helper_bounds(res.group(1))
 
-        result = []
-        for word in wordlist:
-            vowel_sum = sum(1 for c in word if c in 'aeiou'.upper())
-            if percentage:
-                vowel_sum = vowel_sum/len(word)*100
-            if vowel_sum >= lower and vowel_sum <= upper:
-                result.append(word)
-        return result
+        dataset = {word: sum(1 for c in word if c in 'aeiou'.upper()) for word in wordlist}
+        if percentage:
+            dataset = {word: vowel_sum/len(word)*100 for word, vowel_sum in dataset.iteritems()}
+        return [word for word, vowel_sum in dataset.iteritems() if vowel_sum >= lower and vowel_sum <= upper]
     else:
         return None
 
@@ -425,14 +384,7 @@ def parse_word_divisible(line):
         divisor = int(res.group(1))
         divisible = 'YES' == res.group(2)
 
-        result = []
-        for word in wordlist:
-            word_num = base26(word)
-            if word_num % divisor == 0 and divisible:
-                result.append(word)
-            elif word_num % divisor != 0 and not divisible:
-                result.append(word)
-        return result
+        return [word for word in wordlist if (base26(word) % divisor == 0) == divisible]
     else:
         return None
 
@@ -444,24 +396,12 @@ def parse_word_representation(line):
         repr_type = res.group(1)
         representable = 'YES' == res.group(2)
 
-        result = []
         if repr_type == 'an unsigned 32-bit integer':
-            for word in wordlist:
-                word_num = base26(word)
-                if len(bin(word_num)[2:]) <= 32 and representable:
-                    result.append(word)
-                elif len(bin(word_num)[2:]) > 32 and not representable:
-                    result.append(word)
+            return [word for word in wordlist if (len(bin(base26(word))[2:]) <= 32) == representable]
         elif repr_type == 'an unsigned 64-bit integer':
-            for word in wordlist:
-                word_num = base26(word)
-                if len(bin(word_num)[2:]) <= 64 and representable:
-                    result.append(word)
-                elif len(bin(word_num)[2:]) > 64 and not representable:
-                    result.append(word)
+            return [word for word in wordlist if (len(bin(base26(word))[2:]) <= 64) == representable]
         else:
             assert False, 'Unknown representation: %s' % res.group(1)
-        return result
     else:
         res = parse_word_representation_exact_regex.match(line)
         if res:
@@ -474,15 +414,7 @@ def parse_word_representation(line):
                 assert False, 'Unknown format: %s' % res.group(1)
             representable = 'YES' == res.group(2)
 
-            result = []
-            for word in wordlist:
-                word_num = base26(word)
-                parsed, = unpack(format_char, pack(format_char, word_num))
-                if word_num == parsed and representable:
-                    result.append(word)
-                elif word_num != parsed and not representable:
-                    result.append(word)
-            return result
+            return [word for word in wordlist if (unpack(format_char, pack(format_char, base26(word)))[0] == base26(word)) == representable]
         else:
             return None
 
@@ -513,15 +445,12 @@ all_matchers = [
 
 # File processor
 
-
-
-
-def process_file(fname, testword=None):
+def process_file(fname, verbose=False, testword=None):
     if not fname:
         return []
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
-    words = None
+    words = oldwords = None
     for line in lines:
         if not line:
             continue
@@ -538,7 +467,8 @@ def process_file(fname, testword=None):
         if line.startswith('True statements about') or line.startswith('Some statements that uniquely identify'):
             continue
 
-        # print line
+        if verbose:
+            print line
 
         matched = 0
         for matcher in all_matchers:
@@ -553,9 +483,15 @@ def process_file(fname, testword=None):
             break
 
         assert matched, "Line not matched: %s" % (line,)
-        if len(words) <= 0:
-            print "WARNING: Line removed all words: %s (in fname: %s)\n" % (line, fname)
-        if testword:
-            assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
+        try:
+            assert len(words) > 0, "Line removed all words: %s\n" % (line)
+            if testword:
+                assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
+        except AssertionError as e:
+            if verbose:
+                print 'ERROR! last words before it:'
+                print oldwords
+            raise e
+        oldwords = words
     return words
 

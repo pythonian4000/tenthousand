@@ -14,6 +14,10 @@ _PARSER.add_argument(
     '-c',
     help='Column number of cell',
     type=str)
+_PARSER.add_argument(
+    '-v',
+    help='Verbose',
+    action='store_true')
 
 # Set up pyramid.
 
@@ -28,7 +32,7 @@ from multiprocessing import Pool, cpu_count
 
 # Load in pyramid data.
 
-def process_all():
+def process_all(verbose):
     print
     print '---------------'
     print 'Solving pyramid'
@@ -71,14 +75,11 @@ def process_row(row):
 
 
 parsed_args = _PARSER.parse_args()
-if parsed_args.r and parsed_args.c:
+if not parsed_args.r or not parsed_args.c:
+    process_all(parsed_args.v)
+else:
     # Run for a single cell.
     words = process_file(
         'pyramid/row%s/row%s_col%s.txt' %
-        (parsed_args.r, parsed_args.r, parsed_args.c))
+        (parsed_args.r, parsed_args.r, parsed_args.c), verbose=parsed_args.v)
     print words
-elif parsed_args.r:
-    # Run a single row.
-    process_row(parsed_args.r)
-else:
-    process_all()
