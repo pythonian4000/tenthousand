@@ -26,6 +26,11 @@ cols=142
 #properties = [['']*cols for i in range(rows)]
 prop_strings = defaultdict(list)
 
+with open("partial_results.txt") as datafile:
+    with open("partial_results.py", "wb") as outfile:
+        outfile.write("results = ");
+        outfile.write(datafile.read())
+
 from partial_results import results
 
 
