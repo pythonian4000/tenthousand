@@ -18,12 +18,12 @@ for word in wordlist:
 anagrams_0 = set()
 anagrams_1 = set()
 anagrams_2 = set()
-"""with open('anagrams-0.txt') as f:
+with open('anagrams-0.txt') as f:
     anagrams_0 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-1.txt') as f:
     anagrams_1 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-2.txt') as f:
-    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())"""
+    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())
 
 have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
 have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
@@ -176,6 +176,33 @@ def parse_common_vowels(line):
             if percentage:
                 most_common = most_common/len(word)*100
             if most_common >= lower and most_common <= upper:
+                result.append(word)
+        return result
+    else:
+        return None
+
+def parse_distinct(line):
+    res = re.match(r'^Distinct (.+): (.+)', line)
+    if res:
+        lower, upper, percentage = helper_bounds(res.group(2))
+
+        result = []
+        for word in wordlist:
+            unique = ''.join(set(word))
+            count = 0
+            if res.group(1) == 'vowels':
+                for c in unique:
+                    for vowel in 'aeiou'.upper():
+                        if c == vowel:
+                            count+=1
+            elif res.group(1) == 'consonants':
+                for c in unique:
+                    for consonant in 'bcdfghjklmnpqrstvwxyz'.upper():
+                        if c == consonant:
+                            count+=1
+            else: #letters
+                count = len(unique)
+            if count >= lower and count <= upper:
                 result.append(word)
         return result
     else:
@@ -358,6 +385,7 @@ all_matchers = [parse_contains,
                 parse_anagram,
                 parse_common_letters,
                 parse_common_vowels,
+                parse_distinct,
                 parse_length,
                 parse_marked,
                 parse_scrabble,
