@@ -1,5 +1,7 @@
 from os import listdir
 
+print 'Warming up...'
+
 from parsers import process_file
 
 detailed = {}
@@ -14,6 +16,7 @@ for filename in listdir('pyramid/examples'):
         elif filename.startswith('normal'):
             normal[word] = 'pyramid/examples/%s' % filename
 
+print
 print '-------------------------------------------'
 print 'First test set: true statements about words'
 print '-------------------------------------------'
