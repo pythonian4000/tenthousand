@@ -29,23 +29,6 @@ def helper_bounds(bounds):
 
     return lower, upper, percentage
 
-def find_nonoverlapping_from(word, dataset, start):
-    count = 0
-    next_start = 0
-    for i in range(start, len(word)):
-        if i < next_start:
-            continue
-        if word[i:i+2].upper() in dataset:
-            count += 2
-            next_start = i+2
-    return count
-
-def find_nonoverlapping_fast(word, dataset):
-    # Assumes only two-character entries
-    count = find_nonoverlapping_from(word, dataset, 0)
-    count_off1 = find_nonoverlapping_from(word, dataset, 1)
-    return max(count, count_off1)
-
 def find_nonoverlapping_recursive(word, dataset, i, _mem):
     if i >= len(word):
         return 0
@@ -97,10 +80,10 @@ def doubledletter(word):
     found2 = False
     found_same = False
     found_different = False
-    for i,c in enumerate(word):
-        if i == len(word) -1:
-            break
-        if c == word[i+1]:
+    for i in range(len(word)-1):
+        if word[i] == word[i+1]:
+            i += 1
+            c = word[i]
             if found1:
                 found2 = True
                 for x in found_char:

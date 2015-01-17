@@ -45,11 +45,19 @@ doubled_letter_2_same = set()
 doubled_letter_2_different = set()
 
 for word in wordlist:
+    double_found1, double_found2, double_found_same, double_found_different = doubledletter(word)
+    if double_found1:
+        doubled_letter_1.add(word)
+    if double_found2:
+        if double_found_same:
+            doubled_letter_2_same.add(word)
+        if double_found_different:
+            doubled_letter_2_different.add(word)
+    
     for shift in range(1,26):
         shifted = caesar(word, shift)
         if shifted in wordlist:
             caesar_shiftable.add(word)
-            break
 
     l, v, c = find_most_common_char_counts(word)
     most_common_letter_counts[word] = l
@@ -64,16 +72,6 @@ for word in wordlist:
 
     if word[0] in 'aeiou'.upper():
         start_vowel.add(word)
-
-	double_found1, double_found2, double_found_same, double_found_different = doubledletter(word)
-	if double_found1:
-		doubled_letter_1.add(word)
-	if double_found2:
-		if double_found_same:
-			doubled_letter_2_same.add(word)
-		if double_found_different:
-			doubled_letter_2_different.add(word)
-
 
 have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
 have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
@@ -263,10 +261,7 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            #if match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
             count = find_nonoverlapping(word, dataset)
-            #else:
-            #    count = find_nonoverlapping_fast(word, dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
