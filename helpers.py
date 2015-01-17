@@ -29,24 +29,26 @@ def helper_bounds(bounds):
 
     return lower, upper, percentage
 
-def find_nonoverlapping(word, dataset, recurse):
+def find_nonoverlapping_from(word, dataset, start):
     count = 0
-    start = 0
-    first_match = -1
-    for end in range(1, len(word) + 1):
-        if word[start:end].upper() in dataset:
-            count += end - start
-            start = end
-            if first_match < 0:
-                first_match = end
-
-    if recurse and (first_match > 0):
-        for i in range(1, first_match):
-            subcount = find_nonoverlapping(word[i:], dataset, False)
-            if subcount > count:
-                count = subcount
-
+    next_start = 0
+    for i in range(start, len(word)):
+        if i < next_start:
+            continue
+        if word[i:i+2].upper() in dataset:
+            count += 2
+            next_start = i+2
+        elif word[i:i+3].upper() in dataset:
+            count += 3
+            next_start = i+3
     return count
+
+def find_nonoverlapping(word, dataset):
+    count = find_nonoverlapping_from(word, dataset, 0)
+    count_off1 = find_nonoverlapping_from(word, dataset, 1)
+    # Include this in case the dataset includes 3-letter strings
+    count_off2 = find_nonoverlapping_from(word, dataset, 2)
+    return max(count, count_off1, count_off2)
 
 def base26(word):
     word = word.upper()

@@ -278,7 +278,7 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            count = find_nonoverlapping(word, dataset, True)
+            count = find_nonoverlapping(word, dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
