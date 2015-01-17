@@ -9,9 +9,6 @@ with open('pyramid/words.txt') as f:
     wordlist = set(word.upper().rstrip() for word in f.readlines())
 m = hashlib.sha1()
 
-anagrams_0 = set()
-anagrams_1 = set()
-anagrams_2 = set()
 with open('anagrams-0.txt') as f:
     anagrams_0 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-1.txt') as f:
@@ -63,7 +60,7 @@ for word in wordlist:
     sha_words[word] = m
 
     if len(word) <= 3:
-        match_wordlist_3_or_fewer.add(word)
+        match_wordlist_3_or_fewer.add(word.upper())
 
     if word[0] in 'aeiou'.upper():
         start_vowel.add(word)
@@ -266,7 +263,10 @@ def parse_marked(line):
 
         result = []
         for word in wordlist:
-            count = find_nonoverlapping(word, dataset)
+            if match_type == 'occurrences of words in the word list that are 3 or fewer letters long':
+                count = find_nonoverlapping(word, dataset)
+            else:
+                count = find_nonoverlapping_fast(word, dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:

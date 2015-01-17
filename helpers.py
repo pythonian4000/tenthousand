@@ -38,16 +38,39 @@ def find_nonoverlapping_from(word, dataset, start):
         if word[i:i+2].upper() in dataset:
             count += 2
             next_start = i+2
-        elif word[i:i+3].upper() in dataset:
-            count += 3
-            next_start = i+3
     return count
 
-def find_nonoverlapping(word, dataset):
+def find_nonoverlapping_fast(word, dataset):
+    # Assumes only two-character entries
     count = find_nonoverlapping_from(word, dataset, 0)
     count_off1 = find_nonoverlapping_from(word, dataset, 1)
-    # Include this in case the dataset includes 3-letter strings
-    count_off2 = find_nonoverlapping_from(word, dataset, 2)
+    return max(count, count_off1)
+
+def find_nonoverlapping_recursive(word, dataset, i):
+    if i >= len(word):
+        return 0
+
+    found2 = found3 = False
+    if word[i:i+2].upper() in dataset:
+        found2 = True
+    if word[i:i+3].upper() in dataset:
+        found3 = True
+
+    if found2 and not found3:
+        return find_nonoverlapping_recursive(word, dataset, i+2) + 1
+    elif found3 and not found2:
+        return find_nonoverlapping_recursive(word, dataset, i+3) + 1
+    elif found2 and found3:
+        count2 = find_nonoverlapping_recursive(word, dataset, i+2)
+        count3 = find_nonoverlapping_recursive(word, dataset, i+3)
+        return max(count2, count3) + 1
+    else:
+        return 0
+
+def find_nonoverlapping(word, dataset):
+    count = find_nonoverlapping_recursive(word, dataset, 0)
+    count_off1 = find_nonoverlapping_recursive(word, dataset, 1)
+    count_off2 = find_nonoverlapping_recursive(word, dataset, 2)
     return max(count, count_off1, count_off2)
 
 base26_alphabet = string.digits + string.ascii_uppercase[:16]
