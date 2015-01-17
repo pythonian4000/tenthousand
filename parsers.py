@@ -116,7 +116,7 @@ def parse_caesar(line):
         return None
 
 def parse_common(line):
-    res = re.match(r'^Most common (.+)\(s\) each account\(s\) for: (.+)', line)
+    res = re.match(r'^Most common (.+)\(s\) each (account\(s\) for|appear\(s\)): (.+)', line)
     if res:
         match_type = res.group(1)
         if match_type == 'letter':
