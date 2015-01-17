@@ -209,6 +209,17 @@ def parse_distinct(line):
     else:
         return None
 
+def parse_end(line):
+    res = re.match(r'^Ends with: (.+)', line)
+    if res:
+        result = []
+        for word in wordlist:
+            if word.endswith(res.group(1)):
+                result.append(word)
+        return result
+    else:
+        return None
+
 def parse_length(line):
     res = re.match(r'^Length: (.+)', line)
     if res:
@@ -283,6 +294,17 @@ def parse_sha1(line):
             return [word for (word, h) in sha_words.iteritems() if g in h]
 
         assert False, 'Unknown SHA-1 matching: %s' % res.group(1)
+    else:
+        return None
+
+def parse_start(line):
+    res = re.match(r'^Starts with: (.+)', line)
+    if res:
+        result = []
+        for word in wordlist:
+            if word.startswith(res.group(1)):
+                result.append(word)
+        return result
     else:
         return None
 
@@ -387,10 +409,12 @@ all_matchers = [parse_contains,
                 parse_common_letters,
                 parse_common_vowels,
                 parse_distinct,
+                parse_end,
                 parse_length,
                 parse_marked,
                 parse_scrabble,
                 parse_sha1,
+                parse_start,
                 parse_start_vowel,
                 parse_sum_letters,
                 parse_sum_letters_divisible,
