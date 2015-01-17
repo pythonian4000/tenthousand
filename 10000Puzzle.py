@@ -323,6 +323,22 @@ def parse_word_divisible(line):
     else:
         return None
 
+def parse_word_unsigned_32_bit_integer(line):
+    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is representable as an unsigned 32-bit integer: (.+)', line)
+    if res:
+        representable = 'YES' == res.group(1)
+
+        result = []
+        for word in wordlist:
+            word_num = base26(word)
+            if len(bin(word_num)[2:]) <= 32 and representable:
+                result.append(word)
+            elif len(bin(word_num)[2:]) > 32 and not representable:
+                result.append(word)
+        return result
+    else:
+        return None
+
 all_matchers = [parse_contains,
                 parse_anagram,
                 parse_common_letters,
@@ -335,6 +351,7 @@ all_matchers = [parse_contains,
                 parse_sum_letters_divisible,
                 parse_vowels,
                 parse_word_divisible,
+                parse_word_unsigned_32_bit_integer,
 ]
 
 
