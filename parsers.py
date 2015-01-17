@@ -468,7 +468,7 @@ all_matchers = [
 
 # File processor
 
-def process_file(fname):
+def process_file(fname, testword=None):
     with open(fname) as f:
         lines = [line.rstrip() for line in f.readlines()]
     words = oldwords = None
@@ -484,6 +484,7 @@ def process_file(fname):
         # Ignore these, they are from test files
         if line.startswith('True statements about') or line.startswith('Some statements that uniquely identify'):
             continue
+        print line
         matched = 0
         for matcher in all_matchers:
             res = matcher(line)
@@ -497,5 +498,7 @@ def process_file(fname):
             break
         assert matched, "Line not matched: %s" % (line,)
         assert len(words) > 0, "Line removed all words: %s\nLast line's words: %s" % (line, oldwords)
+        if testword:
+            assert testword in words, "Line removed test word %s: %s\nLast line's words: %s" % (testword, line, oldwords)
         oldwords = words
     return words
