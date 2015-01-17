@@ -484,7 +484,8 @@ def process_file(fname, verbose=False, testword=None):
 
         assert matched, "Line not matched: %s" % (line,)
         try:
-            assert len(words) > 0, "Line removed all words: %s\n" % (line)
+            if len(words) == 0:
+                print "Line removed all words: %s\n" % (line)
             if testword:
                 assert testword in words, "Line removed test word %s: %s\n" % (testword, line)
         except AssertionError as e:
