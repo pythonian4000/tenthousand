@@ -85,10 +85,16 @@ def doubledletter(word):
                 found_char.add(c)
     return found1, found2, found_same, found_different
 
-def find_most_common_char_count(word, dataset):
-    most_common = 0
-    for letter in dataset:
-        count = sum(1 for c in word if c == letter)
-        if most_common < count:
-            most_common = count
-    return most_common
+def find_most_common_char_counts(word):
+    l = v = c = 0
+    for letter in string.ascii_uppercase:
+        count = sum(1 for k in word if k == letter)
+        if l < count:
+            l = count
+        if letter in 'AEIOU':
+            if v < count:
+                v = count
+        else:
+            if c < count:
+                c = count
+    return l, v, c

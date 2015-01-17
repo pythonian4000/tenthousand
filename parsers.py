@@ -1,7 +1,7 @@
 from __future__ import division
 import hashlib
 import re
-import string
+from struct import *
 
 from helpers import *
 
@@ -42,6 +42,7 @@ anagrams_2 = set()
 caesar_shiftable = set()
 most_common_letter_counts = {}
 most_common_vowel_counts = {}
+most_common_consonant_counts = {}
 match_wordlist_3_or_fewer = set()
 sha_words = {}
 start_vowel = set()
@@ -56,11 +57,10 @@ for word in wordlist:
             caesar_shiftable.add(word)
             break
 
-    count = find_most_common_char_count(word, string.ascii_uppercase)
-    most_common_letter_counts[word] = count
-
-    count = find_most_common_char_count(word, 'AEIOU')
-    most_common_vowel_counts[word] = count
+    l, v, c = find_most_common_char_counts(word)
+    most_common_letter_counts[word] = l
+    most_common_vowel_counts[word] = v
+    most_common_consonant_counts[word] = c
 
     m = hashlib.sha1(word.lower()).hexdigest()
     sha_words[word] = m
@@ -118,28 +118,22 @@ def parse_caesar(line):
     else:
         return None
 
-def parse_common_letters(line):
-    res = re.match(r'^Most common letter\(s\) each account\(s\) for: (.+)', line)
+def parse_common(line):
+    res = re.match(r'^Most common (.+)\(s\) each account\(s\) for: (.+)', line)
     if res:
-        lower, upper, percentage = helper_bounds(res.group(1))
+        match_type = res.group(1)
+        if match_type == 'letter':
+            dataset = most_common_letter_counts
+        elif match_type == 'vowel':
+            dataset = most_common_vowel_counts
+        elif match_type == 'consonant':
+            dataset = most_common_consonant_counts
+        else:
+            assert False, 'Unknown location: %s' % res.group(1)
+        lower, upper, percentage = helper_bounds(res.group(2))
 
         result = []
-        for word, count in most_common_letter_counts.iteritems():
-            if percentage:
-                count = count/len(word)*100
-            if count >= lower and count <= upper:
-                result.append(word)
-        return result
-    else:
-        return None
-
-def parse_common_vowels(line):
-    res = re.match(r'^Most common vowel\(s\) each appear\(s\): (.+)', line)
-    if res:
-        lower, upper, percentage = helper_bounds(res.group(1))
-
-        result = []
-        for word, count in most_common_vowel_counts.iteritems():
+        for word, count in dataset.iteritems():
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
@@ -427,13 +421,33 @@ def parse_word_representation(line):
             assert False, 'Unknown representation: %s' % res.group(1)
         return result
     else:
-        return None
+        res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is exactly representable in (.+): (.+)', line)
+        if res:
+            repr_type = res.group(1)
+            if repr_type == 'IEEE 754 single-precision floating point format':
+                format_char = 'f'
+            elif repr_type == 'IEEE 754 double-precision floating point format':
+                format_char = 'd'
+            else:
+                assert False, 'Unknown format: %s' % res.group(1)
+            representable = 'YES' == res.group(2)
+
+            result = []
+            for word in wordlist:
+                word_num = base26(word)
+                parsed, = unpack(format_char, pack(format_char, word_num))
+                if word_num == parsed and representable:
+                    result.append(word)
+                elif word_num != parsed and not representable:
+                    result.append(word)
+            return result
+        else:
+            return None
 
 all_matchers = [
                 parse_anagram,
                 parse_caesar,
-                parse_common_letters,
-                parse_common_vowels,
+                parse_common,
                 parse_contains,
                 parse_distinct,
                 parse_doubled_letters_1,
@@ -462,7 +476,6 @@ def process_file(fname):
         lines = [line.rstrip() for line in f.readlines()]
     words = oldwords = None
     for line in lines:
-        print line
         if not line:
             continue
         # TODO temporary, we don't understand properties yet

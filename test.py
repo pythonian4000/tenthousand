@@ -21,8 +21,9 @@ print '-------------------------------------------'
 print 'First test set: true statements about words'
 print '-------------------------------------------'
 for word in detailed:
+    print 'Testing %s...' % (word,)
     guess = process_file(detailed[word])
-    print '%s: %d guesses' % (word, len(guess))
+    print '%d guesses' % (len(guess))
     assert word in guess
     assert len(guess) == 1
 
@@ -31,7 +32,8 @@ print '--------------------------------------------------------'
 print 'Second test set: statements that uniquely identify words'
 print '--------------------------------------------------------'
 for word in normal:
+    print 'Testing %s...' % (word,)
     guess = process_file(normal[word])
-    print '%s: %d guesses' % (word, len(guess))
+    print '%d guesses' % (len(guess))
     assert word in guess
     assert len(guess) == 1
