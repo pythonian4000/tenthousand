@@ -150,9 +150,10 @@ def parse_common_letters(line):
         result = []
         for word in wordlist:
             most_common = 0
-            count = sum(1 for c in word)
-            if most_common < count:
-                most_common = count
+            for letter in 'abcdefghijklmnopqrstuvwxyz':
+                count = sum(1 for c in word if c == letter)
+                if most_common < count:
+                    most_common = count
             if percentage:
                 most_common = most_common/len(word)*100
             if most_common >= lower and most_common <= upper:
