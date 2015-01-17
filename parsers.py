@@ -5,6 +5,8 @@ from struct import *
 
 from helpers import *
 
+import lettersums_data
+
 with open('pyramid/words.txt') as f:
     wordlist = set(word.upper().rstrip() for word in f.readlines())
 m = hashlib.sha1()
@@ -346,10 +348,9 @@ def parse_sum_letters(line):
         lower, upper, percentage = helper_bounds(res.group(1))
 
         result = []
-        for word in wordlist:
-            letter_sum = sum(ord(c) - ord('A') + 1 for c in word)
-            if letter_sum >= lower and letter_sum <= upper:
-                result.append(word)
+        for letter_sum in range(lower, upper + 1):
+            if letter_sum in lettersums_data.LETTERSUMS:
+                result += lettersums_data.LETTERSUMS[letter_sum]
         return result
     else:
         return None
@@ -361,12 +362,11 @@ def parse_sum_letters_divisible(line):
         divisible = 'YES' == res.group(2)
 
         result = []
-        for word in wordlist:
-            letter_sum = sum(ord(c) - ord('A') + 1 for c in word)
+        for letter_sum in lettersums_data.LETTERSUMS:
             if letter_sum % divisor == 0 and divisible:
-                result.append(word)
+                result += lettersums_data.LETTERSUMS[letter_sum]
             elif letter_sum % divisor != 0 and not divisible:
-                result.append(word)
+                result += lettersums_data.LETTERSUMS[letter_sum]
         return result
     else:
         return None
