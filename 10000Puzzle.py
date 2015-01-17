@@ -182,6 +182,19 @@ def parse_common_vowels(line):
     else:
         return None
 
+def parse_length(line):
+    res = re.match(r'^Length: (.+)', line)
+    if res:
+        lower, upper, percentage = helper_bounds(res.group(1))
+
+        result = []
+        for word in wordlist:
+            if len(word) >= lower and len(word) <= upper:
+                result.append(word)
+        return result
+    else:
+        return None
+
 def parse_marked(line):
     res = re.match(r'If you marked nonoverlapping (.*), you could mark at most: (.*)', line)
     if res:
@@ -314,6 +327,7 @@ all_matchers = [parse_contains,
                 parse_anagram,
                 parse_common_letters,
                 parse_common_vowels,
+                parse_length,
                 parse_marked,
                 parse_scrabble,
                 parse_sha1,
