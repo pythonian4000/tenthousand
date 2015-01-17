@@ -12,12 +12,12 @@ m = hashlib.sha1()
 anagrams_0 = set()
 anagrams_1 = set()
 anagrams_2 = set()
-"""with open('anagrams-0.txt') as f:
+with open('anagrams-0.txt') as f:
     anagrams_0 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-1.txt') as f:
     anagrams_1 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-2.txt') as f:
-    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())"""
+    anagrams_2 = set(word.upper().rstrip() for word in f.readlines())
 
 with open('country-codes.txt') as f:
     match_country_codes = set(word.upper().rstrip() for word in f.readlines())
@@ -36,6 +36,9 @@ scrabble_points = {
     'y':  4, 'z': 10,
 }
 
+anagrams_0 = set()
+anagrams_1 = set()
+anagrams_2 = set()
 caesar_shiftable = set()
 most_common_letter_counts = {}
 most_common_vowel_counts = {}
