@@ -405,18 +405,22 @@ def parse_word_divisible(line):
     else:
         return None
 
-def parse_word_unsigned_32_bit_integer(line):
-    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is representable as an unsigned 32-bit integer: (.+)', line)
+def parse_word_representation(line):
+    res = re.match(r'^Word interpreted as a base 26 number \(A=0, B=1, etc\) is representable as (.+): (.+)', line)
     if res:
-        representable = 'YES' == res.group(1)
+        repr_type = res.group(1)
+        representable = 'YES' == res.group(2)
 
         result = []
-        for word in wordlist:
-            word_num = base26(word)
-            if len(bin(word_num)[2:]) <= 32 and representable:
-                result.append(word)
-            elif len(bin(word_num)[2:]) > 32 and not representable:
-                result.append(word)
+        if repr_type == 'an unsigned 32-bit integer':
+            for word in wordlist:
+                word_num = base26(word)
+                if len(bin(word_num)[2:]) <= 32 and representable:
+                    result.append(word)
+                elif len(bin(word_num)[2:]) > 32 and not representable:
+                    result.append(word)
+        else:
+            assert False, 'Unknown representation: %s' % res.group(1)
         return result
     else:
         return None
@@ -443,7 +447,7 @@ all_matchers = [
                 parse_sum_letters_divisible,
                 parse_vowels,
                 parse_word_divisible,
-                parse_word_unsigned_32_bit_integer,
+                parse_word_representation,
 ]
 
 
