@@ -39,6 +39,9 @@ caesar_shiftable = set()
 match_wordlist_3_or_fewer = set()
 sha_words = {}
 start_vowel = set()
+doubled_letter_1 = set()
+doubled_letter_2_same = set()
+doubled_letter_2_different = set()
 
 for word in wordlist:
     for shift in range(1,26):
@@ -56,11 +59,24 @@ for word in wordlist:
     if word[0] in 'aeiou'.upper():
         start_vowel.add(word)
 
+	double_found1, double_found2, double_found_same, double_found_different = doubledletter(word)
+	if double_found1:
+		doubled_letter_1.add(word)
+	if double_found2:
+		if double_found_same:
+			doubled_letter_2_same.add(word)
+		if double_found_different:
+			doubled_letter_2_different.add(word)
+
+
 have_anagrams = {True: anagrams_0, False: wordlist.difference(anagrams_0)}
 have_anagrams_with_one = {True: anagrams_1, False: wordlist.difference(anagrams_1)}
 have_anagrams_with_two = {True: anagrams_2, False: wordlist.difference(anagrams_2)}
 can_caesar_shift = {True: caesar_shiftable, False: wordlist.difference(caesar_shiftable)}
 starts_with_vowel = {True: start_vowel, False: wordlist.difference(start_vowel)}
+have_doubled_letters = {True: doubled_letter_1, False: wordlist.difference(doubled_letter_1)}
+have_same_doubled_letters = {True: doubled_letter_2_same, False: wordlist.difference(doubled_letter_2_same)}
+have_different_doubled_letters = {True: doubled_letter_2_different, False: wordlist.difference(doubled_letter_2_different)}
 
 
 # Parsers
@@ -170,6 +186,27 @@ def parse_distinct(line):
         return result
     else:
         return None
+
+def parse_doubled_letters_1(line):
+	res = re.match(r'^Contains at least one doubled letter: (.+)', line)
+	if res:
+		return have_doubled_letters['YES' == res.group(1)]
+	else:
+		return None
+
+def parse_doubled_letters_2_same(line):
+	res = re.match(r'^Contains at least two nonoverlapping occurrences of the same doubled letter: (.+)', line)
+	if res:
+		return have_same_doubled_letters['YES' == res.group(1)]
+	else:
+		return None
+
+def parse_doubled_letters_2_different(line):
+	res = re.match(r'^Contains at least two different doubled letters: (.+)', line)
+	if res:
+		return have_different_doubled_letters['YES' == res.group(1)]
+	else:
+		return None
 
 def parse_end(line):
     res = re.match(r'^Ends with: (.+)', line)
@@ -395,6 +432,9 @@ all_matchers = [
                 parse_common_vowels,
                 parse_contains,
                 parse_distinct,
+				parse_doubled_letters_1,
+				parse_doubled_letters_2_same,
+				parse_doubled_letters_2_different,
                 parse_end,
                 parse_keyboard,
                 parse_length,
