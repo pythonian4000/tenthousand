@@ -473,7 +473,6 @@ def process_file(fname):
         lines = [line.rstrip() for line in f.readlines()]
     words = oldwords = None
     for line in lines:
-        print line
         if not line:
             continue
         # TODO temporary, we don't understand properties yet
