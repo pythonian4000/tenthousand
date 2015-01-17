@@ -218,26 +218,20 @@ def parse_end(line):
 def parse_keyboard(line):
     res = re.match(r'^Letters located in the (.+) row on a QWERTY keyboard: (.+)', line)
     if res:
+        match_type = res.group(1)
+        if match_type == 'top':
+            dataset = 'qwertyuiop'.upper()
+        elif match_type == 'middle':
+            dataset = 'asdfghjkl'.upper()
+        elif match_type == 'bottom':
+            dataset = 'zxcvbnm'.upper()
+        else:
+            assert False, 'Unknown location: %s' % res.group(1)
         lower, upper, percentage = helper_bounds(res.group(2))
 
         result = []
         for word in wordlist:
-            count = 0
-            if res.group(1) == 'top':
-                for c in word:
-                    for top in 'qwertyuiop'.upper():
-                        if c == top:
-                            count+=1
-            elif res.group(1) == 'middle':
-                for c in word:
-                    for middle in 'asdfghjkl'.upper():
-                        if c == middle:
-                            count+=1
-            else: #bottom
-                for c in word:
-                    for lower in 'zxcvbnm'.upper():
-                        if c == lower:
-                            count+=1
+            count = sum(1 for c in word if c in dataset)
             if percentage:
                 count = count/len(word)*100
             if count >= lower and count <= upper:
