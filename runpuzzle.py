@@ -25,12 +25,12 @@ pyramid = [[None]*cols for i in range(rows)]
 
 # Load in pyramid data.
 
-print
-print '---------------'
-print 'Solving pyramid'
-print '---------------'
-
 def process_all():
+	print
+	print '---------------'
+	print 'Solving pyramid'
+	print '---------------'
+
 	for dirname in listdir('pyramid'):
 	    if dirname.startswith('row'):
 	        row = int(dirname[3:])
@@ -43,6 +43,8 @@ parsed_args = _PARSER.parse_args()
 if not parsed_args.r or not parsed_args.c:
 	process_all()
 else:
-	process_file(
+	# Run for a single cell.
+	words = process_file(
 		'pyramid/row%s/row%s_col%s.txt' %
 		(parsed_args.r, parsed_args.r, parsed_args.c))
+	print words
