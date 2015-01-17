@@ -1,5 +1,6 @@
 from __future__ import division
 import hashlib
+from os import listdir
 import re
 
 with open('pyramid/words.txt') as f:
@@ -295,6 +296,6 @@ pyramid_data = [[{}]*cols for i in range(rows)]
 for dirname in listdir('pyramid'):
     if dirname.startswith('row'):
         row = int(dirname[3:])
-        for filename in listdir(dirname):
+        for filename in listdir('pyramid/%s' % dirname):
             col = int(filename[(len(dirname) + 4):][:-4])
             pyramid_data[row][col] = process_file('pyramid/%s/%s' % (dirname, filename))
