@@ -42,7 +42,11 @@ def process_all(verbose):
             for filename in listdir('pyramid/%s' % dirname):
                 col = int(filename[(len(dirname) + 4):][:-4])
                 try :
-                    pyramid[row][col] = process_file('pyramid/%s/%s' % (dirname, filename), verbose=verbose)
+                    result = process_file('pyramid/%s/%s' % (dirname, filename), verbose=verbose)
+                    if len(result) == 1:
+                        pyramid[row][col] = result[0]
+                    else:
+                        pyramid[row][col] = ', '.join(list(result))
                 except AssertionError as e:
                     print 'ERROR at row %d col %d:' % (row, col)
                     raise e
