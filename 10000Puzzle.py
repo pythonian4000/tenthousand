@@ -469,6 +469,9 @@ def process_file(fname):
         # TODO temporary, we don't understand properties yet
         if line.startswith('Has property') or line.startswith('This is a word with property') or line.startswith('This is NOT a word with property'):
             continue
+        # TODO temporary, we don't understand colors yet
+        if line.startswith('This word is associated with the color'):
+            continue
         matched = 0
         for matcher in all_matchers:
             res = matcher(line)
