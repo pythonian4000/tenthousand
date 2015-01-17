@@ -9,9 +9,6 @@ with open('pyramid/words.txt') as f:
     wordlist = set(word.upper().rstrip() for word in f.readlines())
 m = hashlib.sha1()
 
-anagrams_0 = set()
-anagrams_1 = set()
-anagrams_2 = set()
 with open('anagrams-0.txt') as f:
     anagrams_0 = set(word.upper().rstrip() for word in f.readlines())
 with open('anagrams-1.txt') as f:
