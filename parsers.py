@@ -1,6 +1,7 @@
 from __future__ import division
 import hashlib
 import re
+import string
 
 from helpers import *
 
@@ -36,6 +37,8 @@ scrabble_points = {
 }
 
 caesar_shiftable = set()
+most_common_letter_counts = {}
+most_common_vowel_counts = {}
 match_wordlist_3_or_fewer = set()
 sha_words = {}
 start_vowel = set()
@@ -49,6 +52,12 @@ for word in wordlist:
         if shifted in wordlist:
             caesar_shiftable.add(word)
             break
+
+    count = find_most_common_char_count(word, string.ascii_uppercase)
+    most_common_letter_counts[word] = count
+
+    count = find_most_common_char_count(word, 'AEIOU')
+    most_common_vowel_counts[word] = count
 
     m = hashlib.sha1(word.lower()).hexdigest()
     sha_words[word] = m
@@ -112,15 +121,10 @@ def parse_common_letters(line):
         lower, upper, percentage = helper_bounds(res.group(1))
 
         result = []
-        for word in wordlist:
-            most_common = 0
-            for letter in 'abcdefghijklmnopqrstuvwxyz'.upper():
-                count = sum(1 for c in word if c == letter)
-                if most_common < count:
-                    most_common = count
+        for word, count in most_common_letter_counts.iteritems():
             if percentage:
-                most_common = most_common/len(word)*100
-            if most_common >= lower and most_common <= upper:
+                count = count/len(word)*100
+            if count >= lower and count <= upper:
                 result.append(word)
         return result
     else:
@@ -132,15 +136,10 @@ def parse_common_vowels(line):
         lower, upper, percentage = helper_bounds(res.group(1))
 
         result = []
-        for word in wordlist:
-            most_common = 0
-            for vowel in 'aeiou'.upper():
-                count = sum(1 for c in word if c == vowel)
-                if most_common < count:
-                    most_common = count
+        for word, count in most_common_vowel_counts.iteritems():
             if percentage:
-                most_common = most_common/len(word)*100
-            if most_common >= lower and most_common <= upper:
+                count = count/len(word)*100
+            if count >= lower and count <= upper:
                 result.append(word)
         return result
     else:
