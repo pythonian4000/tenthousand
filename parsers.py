@@ -122,6 +122,12 @@ for word in wordlist:
             break
 caesar_unshiftable = wordlist.difference(caesar_shiftable)
 
+start_vowel = set()
+for word in wordlist:
+    if word[0] in 'aeiou'.upper():
+        start_vowel.add(word)
+start_vowel_not = wordlist.difference(start_vowel)
+
 
 # Parsers
 
@@ -366,15 +372,7 @@ def parse_start_vowel(line):
     res = re.match(r'^Starts with a vowel: (.+)', line)
     if res:
         vowel = 'YES' == res.group(1)
-        result = []
-        for word in wordlist:
-            starts_vowel = False
-            for v in 'aeiou'.upper():
-                if word[0] == v:
-                    starts_vowel = True
-            if starts_vowel == vowel:
-                result.append(word)
-        return result
+        return vowel and start_vowel or start_vowel_not
     else:
         return None
 
