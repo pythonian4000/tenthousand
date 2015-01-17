@@ -332,6 +332,8 @@ def process_file(fname):
     words = None
     for line in lines:
         print line
+        if not line:
+            continue
         matched = 0
         for matcher in all_matchers:
             res = matcher(line)
