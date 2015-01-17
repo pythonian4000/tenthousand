@@ -134,10 +134,7 @@ def parse_contains(line):
     if res:
         result = []
         for word in wordlist:
-            include = True
-            for c in res.group(1):
-                include = include and c in word
-            if include:
+            if res.group(1) in word:
                 result.append(word)
         return result
     else:
